@@ -1,3 +1,7 @@
+# autoreconf --verbose --install --force -Wall
+# autoupdate --verbose
+# aclocal -Im4 --install --verbose
+#
 AC_PREREQ([2.69])
 AC_INIT([Project],[1.0],[project-bugs@example.org])
 
@@ -71,7 +75,18 @@ AC_CHECK_HEADERS([unistd.h pthread.h])
 
 AC_SEARCH_LIBS([pthread_create], [ptread])
 
-AC_TYPE_SIGNAL
+AC_DIAGNOSE([obsolete],[your code may safely assume C89 semantics that RETSIGTYPE is void.
+Remove this warning and the `AC_CACHE_CHECK' when you adjust the code.])dnl
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+],
+		 [return *(signal (0, 0)) (0) == 1;])],
+		   [ac_cv_type_signal=int],
+		   [ac_cv_type_signal=void])])
+AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
+		    (`int' or `void').])
+
 
 AC_CHECK_TYPE(socklen_t, ,
   [AC_DEFINE([socklen_t], int,
